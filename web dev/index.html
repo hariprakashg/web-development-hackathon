@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en" class="light"> <!-- Default to light theme, will be overridden by JS -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VendorConnect - Connecting Street Food Vendors with Trusted Suppliers</title>
+    <!-- Tailwind CSS CDN for utility-first styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter for a clean, modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS for the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Adjusted light gray background for a cleaner look */
+            color: #333; /* Default text color */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Dark mode styles */
+        html.dark body {
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text color */
+        }
+
+        html.dark .bg-white {
+            background-color: #2d3748; /* Darker background for cards/sections */
+            color: #e2e8f0;
+        }
+
+        html.dark .text-gray-800 {
+            color: #e2e8f0;
+        }
+
+        html.dark .text-gray-600 {
+            color: #cbd5e0;
+        }
+
+        html.dark .text-gray-700 {
+            color: #cbd5e0;
+        }
+
+        html.dark .text-gray-500 {
+            color: #a0aec0;
+        }
+
+        html.dark .border-gray-200 {
+            border-color: #4a5568;
+        }
+
+        html.dark .border-gray-300 {
+            border-color: #4a5568;
+        }
+
+        html.dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+        }
+
+        html.dark .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        html.dark .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        html.dark .placeholder-gray-400::placeholder {
+            color: #a0aec0;
+        }
+
+        /* Custom styles for the verified badge */
+        .verified-badge {
+            display: inline-flex;
+            align-items: center;
+            background-color: #d1fae5; /* Light green */
+            color: #059669; /* Darker green */
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px; /* Fully rounded */
+            font-size: 0.75rem; /* Smaller font size */
+            font-weight: 600;
+        }
+        .verified-badge svg {
+            margin-right: 0.25rem;
+            width: 0.75rem; /* Reduced size */
+            height: 0.75rem; /* Reduced size */
+        }
+
+        /* Dark mode for verified badge */
+        html.dark .verified-badge {
+            background-color: #144d3d; /* Darker green for dark mode */
+            color: #38a169; /* Lighter green for dark mode */
+        }
+
+        /* Theme toggle button styling */
+        #theme-toggle {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 9999px;
+            background-color: #edf2f7; /* Light gray */
+            color: #4a5568; /* Dark gray */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        html.dark #theme-toggle {
+            background-color: #4a5568; /* Darker gray */
+            color: #e2e8f0; /* Light text */
+        }
+
+        #theme-toggle svg {
+            width: 1.25rem; /* Reduced size */
+            height: 1.25rem; /* Reduced size */
+        }
+
+        /* Modal specific styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.hidden {
+            display: none;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        html.dark .modal-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        html.dark .close-button {
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-8 px-4 sm:px-6 lg:px-8">
+
+    <!-- Modal Structure -->
+    <div id="infoModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 class="text-2xl font-bold mb-4" id="modalTitle"></h3>
+            <p class="text-gray-700 mb-6" id="modalMessage"></p>
+            <button class="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200" onclick="closeModal()">Got It!</button>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <header class="w-full max-w-screen-lg bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between transition-colors duration-300">
+        <div class="flex items-center mb-4 md:mb-0">
+            <!-- App Logo/Icon - Shopping bag (Reduced from h-10 w-10 to h-8 w-8) -->
+            <svg class="h-8 w-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+            <h1 class="text-3xl font-bold text-gray-800 dark:text-white">VendorConnect</h1>
+        </div>
+        <nav class="flex items-center space-x-4">
+            <ul class="flex space-x-4">
+                <li>
+                    <button id="vendorViewBtn"
+                        class="font-medium transition-colors duration-200 text-green-600"
+                    >
+                        For Vendors
+                    </button>
+                </li>
+                <li>
+                    <button id="supplierViewBtn"
+                        class="font-medium transition-colors duration-200 text-gray-600 dark:text-gray-300 hover:text-green-600"
+                    >
+                        For Suppliers
+                    </button>
+                </li>
+                <li>
+                    <!-- Updated Login button to link to auth.html -->
+                    <a href="auth.html"
+                        class="font-medium transition-colors duration-200 text-gray-600 dark:text-gray-300 hover:text-green-600"
+                    >
+                        Login
+                    </a>
+                </li>
+            </ul>
+            <!-- Theme Toggle Button (Icons reduced from w-6 h-6 to w-5 h-5) -->
+            <button id="theme-toggle" aria-label="Toggle theme"
+                    class="cursor-pointer p-2 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors duration-300">
+                <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 6.675l-.707-.707M6.675 6.675l-.707-.707m10.65 0l-.707.707M6.675 17.325l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <svg id="moon-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z"></path>
+                </svg>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="w-full max-w-screen-lg bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 mb-8 transition-colors duration-300">
+        <!-- Introduction Section -->
+        <section class="text-center mb-12">
+            <h2 class="text-4xl font-extrabold text-gray-900 dark:text-white mb-4">Empowering Street Food Vendors in India</h2>
+            <p class="text-lg text-gray-600 dark:text-gray-300 leading-relaxed">
+                VendorConnect bridges the gap between street food vendors and trusted, affordable raw material suppliers.
+                Discover new sources, compare prices transparently, and ensure quality with community-driven reviews.
+            </p>
+        </section>
+
+        <!-- Vendor Side Section -->
+        <section id="vendor-section" class="mb-16">
+            <h3 class="text-3xl font-bold text-gray-800 dark:text-white mb-6 text-center">For Street Food Vendors (Buyers)</h3>
+            <p class="text-gray-700 dark:text-gray-300 text-center mb-8">
+                Find the best raw materials at the right price, from verified local suppliers.
+            </p>
+
+            <!-- Search Bar Example (Icon reduced from h-6 w-6 to h-5 w-5) -->
+            <div class="flex items-center border border-gray-300 dark:border-gray-600 rounded-full py-3 px-6 mb-8 shadow-sm focus-within:ring-2 focus-within:ring-green-500 transition-all duration-200">
+                <svg class="h-5 w-5 text-gray-400 dark:text-gray-300 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search for raw materials, e.g., 'Potatoes', 'Cooking Oil'"
+                       class="flex-grow outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 text-lg bg-transparent"
+                       aria-label="Search for raw materials">
+                <button id="searchButton" class="bg-green-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-green-700 transition-colors duration-200 ml-4">Search</button>
+            </div>
+
+            <!-- Product Search Results & Price Comparison Example -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Example Product Card 1 -->
+                <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md p-5 flex flex-col justify-between hover:shadow-lg transition-shadow duration-200">
+                    <div>
+                        <h4 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Potatoes (Grade A)</h4>
+                        <p class="text-3xl font-bold text-green-700 mb-3">₹25<span class="text-lg text-gray-500 dark:text-gray-400">/kg</span></p>
+                        <div class="flex items-center text-gray-600 dark:text-gray-300 text-sm mb-2">
+                            <!-- Verified Badge Icon (Reduced from w-4 h-4 to w-3 h-3) -->
+                            <span class="verified-badge">
+                                <svg fill="currentColor" viewBox="0 0 20 20" class="w-3 h-3 mr-0.5"> <!-- Adjusted mr for smaller icon -->
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Verified
+                            </span>
+                            <span class="ml-3">⭐ 4.5 (120 reviews)</span>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Supplier: Rajesh Vegetables & Fruits</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Distance: 2.5 km</p>
+                    </div>
+                    <button class="view-supplier-btn mt-4 bg-blue-500 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors duration-200"
+                            data-supplier-name="Rajesh Vegetables & Fruits" data-product-name="Potatoes (Grade A)">View Supplier</button>
+                </div>
+
+                <!-- Example Product Card 2 -->
+                <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md p-5 flex flex-col justify-between hover:shadow-lg transition-shadow duration-200">
+                    <div>
+                        <h4 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Cooking Oil (5L)</h4>
+                        <p class="text-3xl font-bold text-green-700 mb-3">₹850<span class="text-lg text-gray-500 dark:text-gray-400">/5L</span></p>
+                        <div class="flex items-center text-gray-600 dark:text-gray-300 text-sm mb-2">
+                            <span class="verified-badge">
+                                <svg fill="currentColor" viewBox="0 0 20 20" class="w-3 h-3 mr-0.5">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Verified
+                            </span>
+                            <span class="ml-3">⭐ 4.8 (85 reviews)</span>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Supplier: Bharat Groceries</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Distance: 1.8 km</p>
+                    </div>
+                    <button class="view-supplier-btn mt-4 bg-blue-500 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors duration-200"
+                            data-supplier-name="Bharat Groceries" data-product-name="Cooking Oil (5L)">View Supplier</button>
+                </div>
+
+                <!-- Example Product Card 3 -->
+                <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md p-5 flex flex-col justify-between hover:shadow-lg transition-shadow duration-200">
+                    <div>
+                        <h4 class="text-xl font-semibold text-gray-800 dark:text-white mb-2">Fresh Tomatoes</h4>
+                        <p class="text-3xl font-bold text-green-700 mb-3">₹30<span class="text-lg text-gray-500 dark:text-gray-400">/kg</span></p>
+                        <div class="flex items-center text-gray-600 dark:text-gray-300 text-sm mb-2">
+                            <span class="verified-badge">
+                                <svg fill="currentColor" viewBox="0 0 20 20" class="w-3 h-3 mr-0.5">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                                Verified
+                            </span>
+                            <span class="ml-3">⭐ 4.2 (65 reviews)</span>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Supplier: Kisan Fresh Produce</p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm">Distance: 3.1 km</p>
+                    </div>
+                    <button class="view-supplier-btn mt-4 bg-blue-500 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors duration-200"
+                            data-supplier-name="Kisan Fresh Produce" data-product-name="Fresh Tomatoes">View Supplier</button>
+                </div>
+            </div>
+
+            <div class="text-center mt-12">
+                <button id="exploreAllMaterialsBtn" class="inline-block bg-green-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-green-700 transition-colors duration-200 shadow-md">
+                    Explore All Raw Materials
+                </button>
+            </div>
+        </section>
+
+        <!-- Supplier Side Section -->
+        <section id="supplier-section" class="mt-16 pt-16 border-t border-gray-200 dark:border-gray-600 hidden">
+            <h3 class="text-3xl font-bold text-gray-800 dark:text-white mb-6 text-center">For Raw Material Suppliers (Sellers)</h3>
+            <p class="text-gray-700 dark:text-gray-300 text-center mb-8">
+                Expand your reach, manage your inventory, and connect with more street food vendors.
+            </p>
+
+            <div class="flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-8">
+                <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md p-6 text-center max-w-sm w-full transition-colors duration-300">
+                    <h4 class="text-xl font-semibold text-gray-800 dark:text-white mb-3">Get Verified & List Products</h4>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Register your business, upload necessary documents for verification, and easily list your raw materials with real-time pricing.
+                    </p>
+                    <button id="becomeSupplierBtn" class="bg-green-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-600 transition-colors duration-200">Become a Supplier</button>
+                </div>
+
+                <div class="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl shadow-md p-6 text-center max-w-sm w-full transition-colors duration-300">
+                    <h4 class="text-xl font-semibold text-gray-800 dark:text-white mb-3">Manage Orders & Reviews</h4>
+                    <p class="text-gray-600 dark:text-gray-300 mb-4">
+                        Receive inquiries from vendors, manage orders efficiently, and build your reputation with vendor reviews.
+                    </p>
+                    <button id="supplierLoginBtn" class="bg-blue-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-600 transition-colors duration-200">Supplier Login</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="w-full max-w-screen-lg text-center text-gray-500 dark:text-gray-400 text-sm mt-8 py-4 border-t border-gray-200 dark:border-gray-600 transition-colors duration-300">
+        &copy; 2025 VendorConnect. All rights reserved.
+    </footer>
+
+    <script>
+        // --- Theme Toggle Logic ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                htmlElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                htmlElement.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                setTheme('dark');
+            } else {
+                setTheme('light');
+            }
+        });
+
+        themeToggle.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                setTheme('light');
+            } else {
+                setTheme('dark');
+            }
+        });
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) { // Only update if no explicit user preference
+                setTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+
+        // --- Modal Logic (for button actions) ---
+        const infoModal = document.getElementById('infoModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeButton = document.querySelector('.close-button');
+
+        function openModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            infoModal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            infoModal.classList.add('hidden');
+        }
+
+        closeButton.addEventListener('click', closeModal);
+        window.addEventListener('click', (event) => {
+            if (event.target === infoModal) {
+                closeModal();
+            }
+        });
+
+        // --- View Switching Logic ---
+        const vendorSection = document.getElementById('vendor-section');
+        const supplierSection = document.getElementById('supplier-section');
+        const vendorViewBtn = document.getElementById('vendorViewBtn');
+        const supplierViewBtn = document.getElementById('supplierViewBtn');
+
+        function showVendorView() {
+            vendorSection.classList.remove('hidden');
+            supplierSection.classList.add('hidden');
+            vendorViewBtn.classList.add('text-green-600');
+            vendorViewBtn.classList.remove('text-gray-600', 'dark:text-gray-300', 'hover:text-green-600');
+            supplierViewBtn.classList.remove('text-green-600');
+            supplierViewBtn.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:text-green-600');
+        }
+
+        function showSupplierView() {
+            supplierSection.classList.remove('hidden');
+            vendorSection.classList.add('hidden');
+            supplierViewBtn.classList.add('text-green-600');
+            supplierViewBtn.classList.remove('text-gray-600', 'dark:text-gray-300', 'hover:text-green-600');
+            vendorViewBtn.classList.remove('text-green-600');
+            vendorViewBtn.classList.add('text-gray-600', 'dark:text-gray-300', 'hover:text-green-600');
+        }
+
+        // Initial view setup
+        document.addEventListener('DOMContentLoaded', () => {
+            showVendorView(); // Default to vendor view on load
+        });
+
+        vendorViewBtn.addEventListener('click', showVendorView);
+        supplierViewBtn.addEventListener('click', showSupplierView);
+
+
+        // --- Button Actions ---
+
+        // 1. Search Button (Vendor Section)
+        document.getElementById('searchButton').addEventListener('click', () => {
+            const searchTerm = document.getElementById('searchInput').value.trim();
+            if (searchTerm) {
+                openModal('Search Initiated', `Searching for "${searchTerm}"... (In a live app, this would fetch real-time data from suppliers based on your search!)`);
+            } else {
+                openModal('Search Empty', 'Please enter a raw material to search for.');
+            }
+        });
+
+        // 2. "View Supplier" Buttons (Product Cards)
+        document.querySelectorAll('.view-supplier-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const supplierName = this.dataset.supplierName;
+                const productName = this.dataset.productName;
+                openModal('Supplier Details', `Viewing details for ${productName} from ${supplierName}. (In a live app, this would navigate to a detailed supplier profile page with their full catalog and reviews!)`);
+            });
+        });
+
+        // 3. "Explore All Raw Materials" Button (Vendor Section)
+        document.getElementById('exploreAllMaterialsBtn').addEventListener('click', () => {
+            openModal('Explore All Materials', 'Navigating to a comprehensive catalog of all raw materials. (In a live app, this would load a new page or section displaying all available products!)');
+        });
+
+        // The general "Login" button in the header now uses an <a> tag for direct navigation
+        // document.getElementById('loginBtn').addEventListener('click', () => { /* No longer needed */ });
+
+        // 5. "Become a Supplier" Button (Supplier Section)
+        document.getElementById('becomeSupplierBtn').addEventListener('click', () => {
+            openModal('Supplier Registration', 'Redirecting to the supplier registration form. (In a live app, this would lead to a multi-step onboarding flow for new suppliers!)');
+        });
+
+        // 6. "Supplier Login" Button (Supplier Section)
+        document.getElementById('supplierLoginBtn').addEventListener('click', () => {
+            openModal('Supplier Login', 'Redirecting to the supplier login page. (In a live app, this would lead to the supplier-specific dashboard!)');
+        });
+
+    </script>
+</body>
+</html>

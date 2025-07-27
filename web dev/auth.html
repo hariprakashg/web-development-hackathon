@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" class="light"> <!-- Default to light theme, will be overridden by JS -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VendorConnect - Login / Register</title>
+    <!-- Tailwind CSS CDN for utility-first styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter for a clean, modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Custom CSS for the Inter font family */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa; /* Adjusted light gray background for a cleaner look */
+            color: #333; /* Default text color */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Dark mode styles */
+        html.dark body {
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text color */
+        }
+
+        html.dark .bg-white {
+            background-color: #2d3748; /* Darker background for cards/sections */
+            color: #e2e8f0;
+        }
+
+        html.dark .text-gray-800 {
+            color: #e2e8f0;
+        }
+
+        html.dark .text-gray-600 {
+            color: #cbd5e0;
+        }
+
+        html.dark .text-gray-700 {
+            color: #cbd5e0;
+        }
+
+        html.dark .text-gray-500 {
+            color: #a0aec0;
+        }
+
+        html.dark .border-gray-200 {
+            border-color: #4a5568;
+        }
+
+        html.dark .border-gray-300 {
+            border-color: #4a5568;
+        }
+
+        html.dark .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+        }
+
+        html.dark .shadow-md {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        html.dark .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        /* Theme toggle button styling */
+        #theme-toggle {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 9999px;
+            background-color: #edf2f7; /* Light gray */
+            color: #4a5568; /* Dark gray */
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        html.dark #theme-toggle {
+            background-color: #4a5568; /* Darker gray */
+            color: #e2e8f0; /* Light text */
+        }
+
+        #theme-toggle svg {
+            width: 1.25rem; /* Reduced size */
+            height: 1.25rem; /* Reduced size */
+        }
+
+        /* Modal specific styles */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.hidden {
+            display: none;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        html.dark .modal-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        html.dark .close-button {
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+
+    <!-- Modal Structure -->
+    <div id="infoModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h3 class="text-2xl font-bold mb-4" id="modalTitle"></h3>
+            <p class="text-gray-700 mb-6" id="modalMessage"></p>
+            <button class="bg-green-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200" onclick="closeModal()">Got It!</button>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="w-full max-w-md bg-white dark:bg-gray-800 shadow-lg rounded-xl p-8 transition-colors duration-300">
+        <div class="flex items-center justify-between mb-8">
+            <div class="flex items-center">
+                <!-- App Logo/Icon - Shopping bag -->
+                <svg class="h-8 w-8 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-white">VendorConnect</h1>
+            </div>
+            <!-- Theme Toggle Button -->
+            <button id="theme-toggle" aria-label="Toggle theme"
+                    class="cursor-pointer p-2 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 transition-colors duration-300">
+                <svg id="sun-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.325 6.675l-.707-.707M6.675 6.675l-.707-.707m10.65 0l-.707.707M6.675 17.325l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <svg id="moon-icon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9 9 0 008.354-5.646z"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex justify-center mb-6">
+            <button id="showLoginBtn" class="px-6 py-2 rounded-l-lg font-semibold transition-colors duration-200"
+                    style="background-color: #4CAF50; color: white;">Login</button>
+            <button id="showRegisterBtn" class="px-6 py-2 rounded-r-lg font-semibold transition-colors duration-200"
+                    style="background-color: #e2e8f0; color: #4a5568;">Register</button>
+        </div>
+
+        <!-- Login Form -->
+        <form id="loginForm" class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white text-center">Login to your account</h2>
+            <div>
+                <label for="loginEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email address</label>
+                <input type="email" id="loginEmail" name="email" required
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-300"
+                       placeholder="you@example.com">
+            </div>
+            <div>
+                <label for="loginPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                <input type="password" id="loginPassword" name="password" required
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-300"
+                       placeholder="••••••••">
+            </div>
+            <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-200 shadow-md">Sign In</button>
+            <p class="text-center text-sm text-gray-600 dark:text-gray-400">
+                <a href="#" class="font-medium text-green-600 hover:text-green-500">Forgot your password?</a>
+            </p>
+        </form>
+
+        <!-- Register Form -->
+        <form id="registerForm" class="space-y-6 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white text-center">Create a new account</h2>
+            <div>
+                <label for="registerName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
+                <input type="text" id="registerName" name="name" required
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-300"
+                       placeholder="John Doe">
+            </div>
+            <div>
+                <label for="registerEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email address</label>
+                <input type="email" id="registerEmail" name="email" required
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-300"
+                       placeholder="you@example.com">
+            </div>
+            <div>
+                <label for="registerPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+                <input type="password" id="registerPassword" name="password" required
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-300"
+                       placeholder="••••••••">
+            </div>
+            <div>
+                <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required
+                       class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 transition-colors duration-300"
+                       placeholder="••••••••">
+            </div>
+            <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-700 transition-colors duration-200 shadow-md">Register Account</button>
+        </form>
+
+        <p class="text-center text-sm text-gray-600 dark:text-gray-400 mt-6">
+            <a href="index.html" class="font-medium text-blue-600 hover:text-blue-500">← Back to Main App</a>
+        </p>
+    </main>
+
+    <script>
+        // --- Theme Toggle Logic (Copied from main app for consistency) ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const htmlElement = document.documentElement;
+        const sunIcon = document.getElementById('sun-icon');
+        const moonIcon = document.getElementById('moon-icon');
+
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                htmlElement.classList.add('dark');
+                sunIcon.classList.remove('hidden');
+                moonIcon.classList.add('hidden');
+            } else {
+                htmlElement.classList.remove('dark');
+                sunIcon.classList.add('hidden');
+                moonIcon.classList.remove('hidden');
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                setTheme('dark');
+            } else {
+                setTheme('light');
+            }
+        });
+
+        themeToggle.addEventListener('click', () => {
+            if (htmlElement.classList.contains('dark')) {
+                setTheme('light');
+            } else {
+                setTheme('dark');
+            }
+        });
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) { // Only update if no explicit user preference
+                setTheme(e.matches ? 'dark' : 'light');
+            }
+        });
+
+        // --- Modal Logic (Copied from main app for consistency) ---
+        const infoModal = document.getElementById('infoModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const closeButton = document.querySelector('.close-button');
+
+        function openModal(title, message) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            infoModal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            infoModal.classList.add('hidden');
+        }
+
+        closeButton.addEventListener('click', closeModal);
+        window.addEventListener('click', (event) => {
+            if (event.target === infoModal) {
+                closeModal();
+            }
+        });
+
+        // --- Form Switching Logic ---
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const showLoginBtn = document.getElementById('showLoginBtn');
+        const showRegisterBtn = document.getElementById('showRegisterBtn');
+
+        function showLoginForm() {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            showLoginBtn.style.backgroundColor = '#4CAF50'; // Green
+            showLoginBtn.style.color = 'white';
+            showRegisterBtn.style.backgroundColor = '#e2e8f0'; // Light gray
+            showRegisterBtn.style.color = '#4a5568';
+            // Dark mode adjustments for buttons
+            if (htmlElement.classList.contains('dark')) {
+                showRegisterBtn.style.backgroundColor = '#4a5568'; // Darker gray
+                showRegisterBtn.style.color = '#e2e8f0';
+            }
+        }
+
+        function showRegisterForm() {
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            showRegisterBtn.style.backgroundColor = '#4CAF50'; // Green
+            showRegisterBtn.style.color = 'white';
+            showLoginBtn.style.backgroundColor = '#e2e8f0'; // Light gray
+            showLoginBtn.style.color = '#4a5568';
+            // Dark mode adjustments for buttons
+            if (htmlElement.classList.contains('dark')) {
+                showLoginBtn.style.backgroundColor = '#4a5568'; // Darker gray
+                showLoginBtn.style.color = '#e2e8f0';
+            }
+        }
+
+        // Initial form view
+        document.addEventListener('DOMContentLoaded', showLoginForm);
+
+        showLoginBtn.addEventListener('click', showLoginForm);
+        showRegisterBtn.addEventListener('click', showRegisterForm);
+
+        // --- Form Submission Actions ---
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent actual form submission
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            openModal('Login Attempt', `Attempting to log in with Email: ${email} and Password: ${password}. (In a real app, this would send data to a server for authentication!)`);
+            // In a real app, you'd send this data to your backend for authentication
+        });
+
+        registerForm.addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent actual form submission
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                openModal('Registration Error', 'Passwords do not match. Please try again.');
+                return;
+            }
+
+            openModal('Registration Attempt', `Attempting to register new user: ${name}, Email: ${email}, Password: ${password}. (In a real app, this would send data to a server for account creation!)`);
+            // In a real app, you'd send this data to your backend for registration
+        });
+    </script>
+</body>
+</html>
